@@ -80,6 +80,7 @@ public class DemoController : MonoBehaviour
         {
             StopAllCoroutines();
             InitMapAndGraph();
+
             FindPath();
         }
     }

@@ -31,15 +31,15 @@ public class GraphView : MonoBehaviour
     private void Awake()
     {
         m_pathfinder = FindObjectOfType<Pathfinder>();
+        m_graph = GetComponent<Graph>();
 
+        // subscribe to Pathfinder events/actions
         if (m_pathfinder)
         {
             m_pathfinder.initLevelAction += OnInitLevel;
             m_pathfinder.drawIterationAction += OnDraw;
             m_pathfinder.foundPathAction += OnFoundPath;
         }
-
-        m_graph = GetComponent<Graph>();
     }
 
     private void OnDisable()
@@ -164,7 +164,6 @@ public class GraphView : MonoBehaviour
 
     public void ColorStartGoalNodes(Node start, Node goal)
     {
-        // TO-DO add a safety check to see if the start and goal is within Bounds
 
         // color start NodeView and goal NodeView directly
         NodeView startNodeView = this.nodeViews[start.xIndex, start.yIndex];
@@ -260,7 +259,6 @@ public class GraphView : MonoBehaviour
         }
     }
 
-
     // show the path arrows for a single Node
     public void ShowNodeArrows(Node node, Color color)
     {
@@ -270,8 +268,6 @@ public class GraphView : MonoBehaviour
             if (nodeView != null)
             {
                 nodeView.ShowArrow(color);
-                //Debug.Log("Showing arrow " + node.xIndex + "," + node.yIndex + "; Color = " + color.ToString());
-
             }
         }
     }
