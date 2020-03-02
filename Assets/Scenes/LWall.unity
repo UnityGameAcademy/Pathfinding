@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -150,16 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50693ef455a2f40479616256a66c6971, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startColor: {r: 0, g: 1, b: 0, a: 1}
-  goalColor: {r: 1, g: 0, b: 0, a: 1}
-  frontierColor: {r: 1, g: 0, b: 1, a: 1}
-  exploredColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  pathColor: {r: 0, g: 1, b: 1, a: 1}
-  arrowColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
-  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
   showIterations: 1
-  showColors: 1
-  showArrows: 0
   exitOnGoal: 1
   isComplete: 0
   mode: 1
@@ -399,7 +390,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &1864305721
 Light:
   m_ObjectHideFlags: 0
@@ -531,5 +522,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f06d07a44290449a4b1a91b7da9b6738, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showColors: 1
+  showArrows: 1
   nodeViewPrefab: {fileID: 1223641816249660, guid: 40c519f1813e14439a69d0720fd2efc7,
     type: 3}
+  startColor: {r: 0, g: 1, b: 0, a: 1}
+  goalColor: {r: 1, g: 0, b: 0, a: 1}
+  frontierColor: {r: 1, g: 0, b: 1, a: 1}
+  exploredColor: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 1}
+  pathColor: {r: 0, g: 1, b: 1, a: 1}
+  arrowColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}

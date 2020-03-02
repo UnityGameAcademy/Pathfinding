@@ -21,6 +21,7 @@ public class DemoController : MonoBehaviour
     public int goalX = 15;
     public int goalY = 1;
 
+    public KeyCode restartKey = KeyCode.Space;
     // delay between iterations
     public float timeStep = 0.1f;
 
@@ -28,28 +29,58 @@ public class DemoController : MonoBehaviour
     {
         if (mapData != null && graph != null)
         {
-            // generate the map from text file or texture map
-            int[,] mapInstance = mapData.MakeMap();
-
-            // initialize the graph
-            graph.Init(mapInstance);
-
-            // generate the GraphView
-            GraphView graphView = graph.gameObject.GetComponent<GraphView>();
-            if (graphView != null)
-            {
-                graphView.Init(graph);
-            }
-
-            // initialize the Pathfinder and begin the graph search
-            if (graph.IsWithinBounds(startX,startY) && graph.IsWithinBounds(goalX, goalY) && pathfinder != null)
-            {
-                Node startNode = graph.nodes[startX, startY];
-                Node goalNode = graph.nodes[goalX, goalY];
-                pathfinder.Init(graph, graphView, startNode, goalNode);
-                StartCoroutine(pathfinder.SearchRoutine(timeStep));
-            }
+            InitMapAndGraph();
+            FindPath();
         }
     }
 
+    private void InitMapAndGraph()
+    {
+        // generate the map from text file or texture map
+        int[,] mapInstance = mapData.MakeMap();
+
+        // initialize the graph
+        graph.Init(mapInstance);
+    }
+
+    // initialize the Pathfinder and begin the graph search
+    private void FindPath()
+    {
+        if (pathfinder == null)
+        {
+            Debug.LogWarning("DEMOCONTROLLER FindPath: Missing Pathfinder!");
+            return;
+        }
+        if (graph == null)
+        {
+            Debug.LogWarning("DEMOCONTROLLER FindPath: Missing Graph!");
+            return;
+        }
+
+        if (!graph.IsWithinBounds(startX, startY) || !graph.IsWithinBounds(goalX, goalY))
+        {
+            Debug.LogWarning("DEMOCONTROLLER FindPath: start or goal out of bounds!");
+            return;
+        }
+
+        Node startNode = graph.nodes[startX, startY];
+        Node goalNode = graph.nodes[goalX, goalY];
+
+
+        pathfinder.Init(graph, startNode, goalNode);
+
+        StartCoroutine(pathfinder.SearchRoutine(timeStep));
+
+    }
+
+    private void Update()
+    {
+
+        if (Input.GetKeyDown(restartKey))
+        {
+            StopAllCoroutines();
+            InitMapAndGraph();
+            FindPath();
+        }
+    }
 }

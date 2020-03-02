@@ -150,19 +150,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50693ef455a2f40479616256a66c6971, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startColor: {r: 0, g: 1, b: 0, a: 1}
-  goalColor: {r: 1, g: 0, b: 0, a: 1}
-  frontierColor: {r: 1, g: 0, b: 1, a: 1}
-  exploredColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  pathColor: {r: 0, g: 1, b: 1, a: 1}
-  arrowColor: {r: 0.8455882, g: 0.8455882, b: 0.8455882, a: 1}
-  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
   showIterations: 1
-  showColors: 1
-  showArrows: 0
   exitOnGoal: 1
   isComplete: 0
-  mode: 3
+  mode: 1
 --- !u!4 &689541253
 Transform:
   m_ObjectHideFlags: 0
@@ -213,7 +204,8 @@ MonoBehaviour:
   startY: 0
   goalX: 20
   goalY: 12
-  timeStep: 0.1
+  restartKey: 32
+  timeStep: 0
 --- !u!4 &907905448
 Transform:
   m_ObjectHideFlags: 0
@@ -531,5 +523,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f06d07a44290449a4b1a91b7da9b6738, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showColors: 1
+  showArrows: 1
   nodeViewPrefab: {fileID: 1223641816249660, guid: 40c519f1813e14439a69d0720fd2efc7,
     type: 3}
+  startColor: {r: 0, g: 1, b: 0, a: 1}
+  goalColor: {r: 1, g: 0, b: 0, a: 1}
+  frontierColor: {r: 1, g: 0, b: 1, a: 1}
+  exploredColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  pathColor: {r: 0, g: 1, b: 1, a: 1}
+  arrowColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}

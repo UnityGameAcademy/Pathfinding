@@ -1,47 +1,51 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+using System;
 
 //
 public class Pathfinder : MonoBehaviour
 {
+    //private variables
+
     // the start of our path
-    Node m_startNode;
+    private Node m_startNode;
 
     // the end
-    Node m_goalNode;
+    private Node m_goalNode;
 
     // Graph and GraphView components 
-    Graph m_graph;
-    GraphView m_graphView;
+    private Graph m_graph;
 
     // the "open set" of Nodes that are next to be explored
-    PriorityQueue<Node> m_frontierNodes;
+    private PriorityQueue<Node> m_frontierNodes;
 
     // the "closed set" of Nodes that have been explored
-    List<Node> m_exploredNodes;
+    private List<Node> m_exploredNodes;
 
     // the List of Nodes that make up our final path from start to goal
-    List<Node> m_pathNodes;
+    private List<Node> m_pathNodes;
 
-    // colors to show our various NodeViews
-    public Color startColor = Color.green;
-    public Color goalColor = Color.red;
-    public Color frontierColor = Color.magenta;
-    public Color exploredColor = Color.gray;
-    public Color pathColor = Color.cyan;
-    public Color arrowColor = new Color(0.85f, 0.85f, 0.85f, 1f);
-    public Color highlightColor = new Color(1f, 1f, 0.5f, 1f);
+    private bool m_hasFoundGoal;
+
+    // properties
+    public Node StartNode => m_startNode;
+    public Node GoalNode => m_goalNode;
+    public PriorityQueue<Node> FrontierNodes => m_frontierNodes;
+    public List<Node> ExploredNodes => m_exploredNodes;
+    public List<Node> PathNodes => m_pathNodes;
+    public bool HasFoundGoal => m_hasFoundGoal;
+
+    // events and actions
+    public Action initLevelAction;
+    public Action drawIterationAction;
+    public Action foundPathAction;
+
+
+    // public variables
 
     // do we show each iteration?
     public bool showIterations = true;
-
-    // do we show the colors on the NodeViews and GraphView?
-    public bool showColors = true;
-
-    // do we enable the arrow diagnostics?
-    public bool showArrows = true;
 
     // do we terminate the search early?
     public bool exitOnGoal = true;
@@ -65,10 +69,12 @@ public class Pathfinder : MonoBehaviour
     public Mode mode = Mode.BreadthFirstSearch;
 
     // initialize the pathfinder
-    public void Init(Graph graph, GraphView graphView, Node start, Node goal)
+    // public void Init(Graph graph, GraphView graphView, Node start, Node goal)
+    public void Init(Graph graph, Node start, Node goal)
     {
         // log an error if we are missing a start, goal, graph or graphView
-        if (start == null || goal == null || graph == null || graphView == null)
+        //if (start == null || goal == null || graph == null || graphView == null)
+        if (start == null || goal == null || graph == null)
         {
             Debug.LogWarning("PATHFINDER Init error: missing component(s)!");
             return;
@@ -83,12 +89,8 @@ public class Pathfinder : MonoBehaviour
 
         // cache our Graph, GraphView, starting Node, and goal Node
         m_graph = graph;
-        m_graphView = graphView;
         m_startNode = start;
         m_goalNode = goal;
-
-        // draw the background colors of the map
-        ShowColors(graphView, start, goal);
 
         // our frontier begins with only the start Node
         m_frontierNodes = new PriorityQueue<Node>();
@@ -111,53 +113,10 @@ public class Pathfinder : MonoBehaviour
         isComplete = false;
         m_iterations = 0;
         m_startNode.distanceTraveled = 0;
-    }
 
-    // show colors on the GraphView
-    void ShowColors(bool lerpColor = false, float lerpValue = 0.5f)
-    {
-        ShowColors(m_graphView, m_startNode, m_goalNode, lerpColor, lerpValue);
-    }
+        m_hasFoundGoal = false;
 
-	// show colors on the GraphView
-	void ShowColors(GraphView graphView, Node start, Node goal, bool lerpColor = false, float lerpValue = 0.5f)
-    {
-        // return if we are missing GraphView, start Node or goal Node
-        if (graphView == null || start == null || goal == null)
-        {
-            return;
-        }
-
-        // color frontier, explored and path Nodes
-        if (m_frontierNodes != null)
-        {
-            graphView.ColorNodes(m_frontierNodes.ToList(), frontierColor, lerpColor, lerpValue);
-        }
-
-        if (m_exploredNodes != null)
-        {
-            graphView.ColorNodes(m_exploredNodes, exploredColor, lerpColor, lerpValue);
-        }
-
-        if (m_pathNodes != null && m_pathNodes.Count > 0)
-        {
-            graphView.ColorNodes(m_pathNodes, pathColor, lerpColor, lerpValue * 2f);
-        }
-
-        // color start NodeView and goal NodeView directly
-        NodeView startNodeView = graphView.nodeViews[start.xIndex, start.yIndex];
-
-        if (startNodeView != null)
-        {
-            startNodeView.ColorNode(startColor);
-        }
-
-        NodeView goalNodeView = graphView.nodeViews[goal.xIndex, goal.yIndex];
-
-        if (goalNodeView != null)
-        {
-            goalNodeView.ColorNode(goalColor);
-        }
+        initLevelAction?.Invoke();
     }
 
     // main graph search routine
@@ -203,9 +162,17 @@ public class Pathfinder : MonoBehaviour
                     ExpandFrontierAStar(currentNode);
                 }
 
+                // notify UI to draw
+                if (showIterations)
+                {
+                    drawIterationAction?.Invoke();
+                    yield return new WaitForSeconds(timeStep);
+                }
+
                 // if the goal node is in the frontier
                 if (m_frontierNodes.Contains(m_goalNode))
                 {
+
                     // set the path Nodes
                     m_pathNodes = GetPathNodes(m_goalNode);
 
@@ -214,57 +181,27 @@ public class Pathfinder : MonoBehaviour
                     {
                         isComplete = true;
                         Debug.Log("PATHFINDER mode: " + mode.ToString() + "    path length = " + m_goalNode.distanceTraveled.ToString());
+                        foundPathAction.Invoke();
                     }
                 }
 
-                // draw colors and arrows
-                if (showIterations)
-                {
-                    ShowDiagnostics(true, 0.5f);
-
-                    yield return new WaitForSeconds(timeStep);
-                }
             }
             // ...else we have explored the entire available graph
             else
             {
                 isComplete = true;
+                foundPathAction.Invoke();
             }
         }
 
-        // draw colors and arrows once more
-        ShowDiagnostics(true, 0.5f);
 
         // console log the elapsed time
         Debug.Log("PATHFINDER SearchRoutine: elapse time = " + (Time.realtimeSinceStartup - timeStart).ToString() + " seconds");
     }
 
-    // wrapper method to show colors and arrows
-    private void ShowDiagnostics(bool lerpColor = false, float lerpValue = 0.5f)
-    {
-        // show colors on the GraphView
-        if (showColors)
-        {
-            ShowColors(lerpColor, lerpValue);
-        }
-
-        // show the arrows 
-        if (m_graphView != null && showArrows)
-        {
-            // show arrows from the frontier in the arrow color
-            m_graphView.ShowNodeArrows(m_frontierNodes.ToList(), arrowColor);
-
-            // show the arrows along the completed path in the highlight color
-            if (m_frontierNodes.Contains(m_goalNode))
-            {
-                m_graphView.ShowNodeArrows(m_pathNodes, highlightColor);
-            }
-        }
-    }
-
 
 	// expand the frontier nodes using Breadth First Search from a single node
-	void ExpandFrontierBreadthFirst(Node node)
+	private void ExpandFrontierBreadthFirst(Node node)
     {
         if (node != null)
         {
@@ -293,7 +230,7 @@ public class Pathfinder : MonoBehaviour
     }
 
 	// expand the frontier nodes using Dijkstra's algorithm from a single node
-	void ExpandFrontierDijkstra(Node node)
+	private void ExpandFrontierDijkstra(Node node)
     {
         if (node != null)
         {
@@ -326,7 +263,7 @@ public class Pathfinder : MonoBehaviour
     }
 
 	// expand the frontier nodes using Greedy Best-First search from a single node
-	void ExpandFrontierGreedyBestFirst(Node node)
+	private void ExpandFrontierGreedyBestFirst(Node node)
 	{
 		if (node != null)
 		{
@@ -360,7 +297,7 @@ public class Pathfinder : MonoBehaviour
 	}
 
     // expand the frontier nodes using AStar search from a single node
-	void ExpandFrontierAStar(Node node)
+	private void ExpandFrontierAStar(Node node)
 	{
 		if (node != null)
 		{
@@ -399,7 +336,7 @@ public class Pathfinder : MonoBehaviour
 	}
 
     // generate a list of path Nodes working backward from an end Node
-    List<Node> GetPathNodes(Node endNode)
+    private List<Node> GetPathNodes(Node endNode)
     {
         List<Node> path = new List<Node>();
         if (endNode == null)
